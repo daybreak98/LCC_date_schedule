@@ -246,12 +246,16 @@ def compute_stats() -> dict[str, Any]:
     by_category: dict[str, int] = {}
     by_weekday = {str(index): 0 for index in range(7)}
     total_minutes = 0
+    all_time_minutes = 0
     for event in month_events:
         by_day[event["event_date"]] = by_day.get(event["event_date"], 0) + 1
         by_category[event["category"]] = by_category.get(event["category"], 0) + 1
         weekday = datetime.strptime(event["event_date"], "%Y-%m-%d").weekday()
         by_weekday[str(weekday)] += 1
         total_minutes += duration_minutes(event)
+
+    for event in events:
+        all_time_minutes += duration_minutes(event)
 
     busiest_day = max(by_day.items(), key=lambda item: item[1], default=("", 0))
     top_category = max(by_category.items(), key=lambda item: item[1], default=("General", 0))
@@ -262,6 +266,7 @@ def compute_stats() -> dict[str, Any]:
         "busiest_day": {"date": busiest_day[0], "count": busiest_day[1]},
         "top_category": {"name": top_category[0], "count": top_category[1]},
         "total_hours": round(total_minutes / 60, 1),
+        "all_time_hours": round(all_time_minutes / 60, 1),
         "by_day": by_day,
         "by_category": by_category,
         "by_weekday": by_weekday,
@@ -316,15 +321,26 @@ class ScheduleHandler(BaseHTTPRequestHandler):
         params = parse_qs(query)
         start = normalize_date(params.get("start", [""])[0]) or "0001-01-01"
         end = normalize_date(params.get("end", [""])[0]) or "9999-12-31"
-        events = db_rows(
-            """
-            SELECT * FROM events
+        limit = int(params.get("limit", [0])[0]) or 0
+        offset = int(params.get("offset", [0])[0]) or 0
+
+        query_sql = """
+            SELECT *, COUNT(*) OVER() AS total_count
+            FROM events
             WHERE event_date BETWEEN ? AND ?
             ORDER BY event_date, start_time, title
-            """,
-            (start, end),
-        )
-        self.send_json({"events": events})
+        """
+        if limit > 0:
+            query_sql += " LIMIT ? OFFSET ?"
+            rows = db_rows(query_sql, (start, end, limit, offset))
+        else:
+            rows = db_rows(query_sql, (start, end))
+
+        total = rows[0]["total_count"] if rows else 0
+        for row in rows:
+            row.pop("total_count", None)
+
+        self.send_json({"events": rows, "total": total})
 
     def handle_create_event(self) -> None:
         try:
@@ -384,7 +400,7 @@ class ScheduleHandler(BaseHTTPRequestHandler):
             content = str(payload.get("content") or "")
             parsed_events = parse_import(filename, content)
             inserted = [insert_event(event) for event in parsed_events]
-            self.send_json({"imported": len(inserted), "events": inserted})
+            self.send_json({"imported": len(inserted), "events": inserted}, HTTPStatus.CREATED)
         except (ValueError, ElementTree.ParseError, json.JSONDecodeError) as exc:
             self.send_json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
 

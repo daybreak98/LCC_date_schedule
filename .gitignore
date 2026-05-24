@@ -4,3 +4,5 @@ data/*.db
 __pycache__/
 *.pyc
 .DS_Store
+test-results/
+playwright-report/
