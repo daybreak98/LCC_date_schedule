@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 from xml.etree import ElementTree
+import os
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -18,8 +19,9 @@ DIST_DIR = BASE_DIR / "dist"
 DATA_DIR = BASE_DIR / "data"
 DB_PATH = DATA_DIR / "schedule.db"
 
-HOST = "127.0.0.1"
-PORT = 8000
+HOST = os.environ.get("SCHEDULE_HOST", "127.0.0.1")
+PORT = int(os.environ.get("SCHEDULE_PORT", "8000"))
+ALLOWED_ORIGIN = os.environ.get("SCHEDULE_ALLOWED_ORIGIN", "*")
 
 
 def init_db() -> None:
@@ -275,6 +277,16 @@ def compute_stats() -> dict[str, Any]:
 
 class ScheduleHandler(BaseHTTPRequestHandler):
     server_version = "ScheduleHTTP/1.0"
+
+    def end_headers(self) -> None:
+        self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        super().end_headers()
+
+    def do_OPTIONS(self) -> None:
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self.end_headers()
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)

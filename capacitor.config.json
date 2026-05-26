@@ -1,0 +1,12 @@
+{
+  "appId": "com.daybreak98.lccschedule",
+  "appName": "LCC Schedule",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "scheme": "LCCSchedule"
+  }
+}
