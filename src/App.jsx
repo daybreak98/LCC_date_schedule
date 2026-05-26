@@ -39,6 +39,7 @@ export default function App() {
   const [hover, setHover] = useState(null);
   const [importStatus, setImportStatus] = useState("支持 .md / .json / .xml / .csv");
   const [isDetailOpen, setIsDetailOpen] = useState(true);
+  const [addFormFocusNonce, setAddFormFocusNonce] = useState(0);
   const [darkMode, setDarkMode] = useState(() => {
     try { return localStorage.getItem("schedule-dark") === "1"; } catch { return false; }
   });
@@ -204,13 +205,19 @@ export default function App() {
     setIsDetailOpen(true);
   }
 
+  function openAddForm() {
+    setIsDetailOpen(true);
+    setAddFormFocusNonce((value) => value + 1);
+    addToast("已定位到添加日程表单", "success");
+  }
+
   function focusDay(key) {
     setFocusedDate(key);
     setSelectedDate(key);
   }
 
   return (
-    <div className={`app ${darkMode ? "dark" : ""}`}>
+    <div className={`app ${darkMode ? "dark" : ""} ${isDetailOpen ? "detail-open" : ""}`}>
       <aside className="rail">
         <div className="brand-block">
           <div className="brand-icon"><CalendarDays size={25} /></div>
@@ -310,7 +317,7 @@ export default function App() {
                 筛选: "{filterMeta.search}"
               </span>
             )}
-            <button className="primary-action" type="button" onClick={() => setIsDetailOpen(true)}>
+            <button className="primary-action" type="button" onClick={openAddForm}>
               <Plus size={18} /> 新增日程
             </button>
           </div>
@@ -353,6 +360,7 @@ export default function App() {
 
       <DetailDrawer
         open={isDetailOpen}
+        focusNonce={addFormFocusNonce}
         selectedDate={selectedDate}
         events={selectedEvents}
         onClose={() => setIsDetailOpen(false)}

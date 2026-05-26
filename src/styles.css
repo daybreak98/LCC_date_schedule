@@ -1004,6 +1004,7 @@ button {
     top: 0;
     right: 0;
     width: min(410px, 92vw);
+    background: rgba(255, 253, 250, 0.96);
     transform: translateX(105%);
     transition: transform 180ms ease;
     box-shadow: var(--shadow);
@@ -1011,6 +1012,15 @@ button {
 
   .detail-drawer.is-open {
     transform: translateX(0);
+  }
+
+  .app.detail-open .stage-header,
+  .app.detail-open .search-filter {
+    max-width: calc(100% - min(410px, 92vw) - 18px);
+  }
+
+  .app.detail-open .stage-actions {
+    justify-content: flex-start;
   }
 
   .analytics {

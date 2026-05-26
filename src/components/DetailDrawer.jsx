@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Plus, X } from "lucide-react";
 import { formatDateZh } from "../utils/date.js";
 import { getDuration } from "../utils/event.js";
@@ -6,11 +6,18 @@ import EditableEventCard from "./EditableEventCard.jsx";
 import TimeSelect from "./TimeSelect.jsx";
 
 export default function DetailDrawer({
-  open, selectedDate, events, onClose,
+  open, focusNonce, selectedDate, events, onClose,
   onCreate, onUpdate, onDelete, onConfirmDelete,
 }) {
   const formRef = useRef(null);
+  const titleInputRef = useRef(null);
   const totalMinutes = events.reduce((sum, event) => sum + getDuration(event), 0);
+
+  useEffect(() => {
+    if (!open || !focusNonce) return;
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => titleInputRef.current?.focus(), 180);
+  }, [focusNonce, open]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -55,7 +62,7 @@ export default function DetailDrawer({
           <span><Plus size={17} /> 添加安排</span>
           <small>{selectedDate}</small>
         </div>
-        <input name="title" required placeholder="事件标题" />
+        <input ref={titleInputRef} name="title" required placeholder="事件标题" />
         <div className="two-col">
           <TimeSelect name="start_time" label="开始时间" />
           <TimeSelect name="end_time" label="结束时间" />
