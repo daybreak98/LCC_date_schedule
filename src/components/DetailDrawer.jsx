@@ -32,7 +32,14 @@ export default function DetailDrawer({
           <span className="overline">Day Detail</span>
           <h2>{formatDateZh(selectedDate)}</h2>
         </div>
-        <button type="button" className="round-button" onClick={onClose} title="收起详情">
+        <button
+          type="button"
+          className="round-button drawer-close"
+          onClick={onClose}
+          title="收起详情"
+          aria-label="收起详情"
+        >
+          <span>收起</span>
           <X size={20} />
         </button>
       </div>
