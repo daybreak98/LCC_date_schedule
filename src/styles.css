@@ -1646,12 +1646,24 @@ button {
 
 /* ========== 每日趋势图 ========== */
 .trend-chart-section {
+  position: relative;
   margin-top: 16px;
   padding: 16px;
+  overflow: hidden;
   border: 1px solid rgba(23, 33, 29, 0.08);
   border-radius: 8px;
   background: rgba(255, 253, 250, 0.86);
   box-shadow: 0 12px 36px rgba(32, 41, 36, 0.08);
+}
+
+.energy-panel::before {
+  position: absolute;
+  inset: -40% -10% auto auto;
+  width: 260px;
+  height: 180px;
+  content: "";
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.17), transparent 68%);
 }
 
 .dark .trend-chart-section {
@@ -1659,39 +1671,177 @@ button {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.energy-legend {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.energy-legend i {
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(15, 118, 110, 0.16), #0f766e 48%, #f59e0b);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.22);
+}
+
 .trend-chart {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(6px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(16px, 1fr));
   align-items: end;
-  gap: 2px;
-  height: 120px;
-  padding-top: 8px;
+  gap: 5px;
+  height: 156px;
+  padding-top: 4px;
 }
 
 .trend-bar {
+  --energy-color: rgba(15, 118, 110, 0.48);
+  --energy-hot: var(--teal);
+  --energy-shadow: rgba(15, 118, 110, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: flex-end;
+  gap: 3px;
   height: 100%;
   min-width: 0;
+  animation: energy-rise 420ms ease both;
+  animation-delay: var(--energy-delay);
 }
 
-.trend-fill {
+.energy-column {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   width: 100%;
-  min-width: 4px;
-  border-radius: 3px 3px 0 0;
-  background: linear-gradient(180deg, var(--teal), rgba(15, 118, 110, 0.35));
+  height: 112px;
+}
+
+.trend-fill,
+.energy-core {
+  position: relative;
+  width: min(100%, 22px);
+  min-width: 7px;
+  height: var(--energy-height);
+  min-height: 6px;
+  overflow: hidden;
+  border-radius: 999px 999px 5px 5px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), transparent 18%),
+    linear-gradient(180deg, var(--energy-hot), var(--energy-color));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.45) inset,
+    0 12px 24px var(--energy-shadow);
+}
+
+.energy-aura {
+  position: absolute;
+  bottom: -3px;
+  width: 30px;
+  height: var(--energy-height);
+  min-height: 8px;
+  border-radius: 999px;
+  background: var(--energy-hot);
+  filter: blur(12px);
+  opacity: 0.22;
+}
+
+.energy-spark {
+  position: absolute;
+  inset: 7px 42% auto;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 0.58;
+}
+
+.energy-idle {
+  --energy-color: rgba(109, 123, 115, 0.18);
+  --energy-hot: rgba(109, 123, 115, 0.28);
+  --energy-shadow: rgba(109, 123, 115, 0.06);
+}
+
+.energy-low {
+  --energy-color: rgba(20, 184, 166, 0.26);
+  --energy-hot: #5eead4;
+  --energy-shadow: rgba(20, 184, 166, 0.14);
+}
+
+.energy-medium {
+  --energy-color: rgba(15, 118, 110, 0.46);
+  --energy-hot: #0f766e;
+  --energy-shadow: rgba(15, 118, 110, 0.22);
+}
+
+.energy-high {
+  --energy-color: #0f766e;
+  --energy-hot: #f59e0b;
+  --energy-shadow: rgba(245, 158, 11, 0.32);
+}
+
+.energy-high .energy-aura {
+  opacity: 0.42;
+  animation: energy-pulse 1.8s ease-in-out infinite;
+}
+
+.energy-high .energy-core {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.52) inset,
+    0 0 22px rgba(245, 158, 11, 0.45),
+    0 18px 34px rgba(15, 118, 110, 0.24);
 }
 
 .dark .trend-fill {
-  background: linear-gradient(180deg, var(--teal), rgba(45, 212, 191, 0.25));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.16) inset,
+    0 14px 28px var(--energy-shadow);
 }
 
 .trend-bar span {
   font-size: 10px;
   color: var(--muted);
   text-align: center;
+}
+
+.trend-bar small {
+  min-height: 13px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.trend-bar:hover small {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes energy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes energy-pulse {
+  0%, 100% {
+    transform: scaleX(0.75);
+  }
+  50% {
+    transform: scaleX(1.18);
+  }
 }
 
 /* ========== 空闲时间面板 ========== */

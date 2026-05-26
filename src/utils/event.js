@@ -110,7 +110,7 @@ export function buildMonthlyTrendData(monthEvents, viewDate) {
 
   for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
     const key = `${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    dailyData[key] = { date: key, minutes: 0, categories: {} };
+    dailyData[key] = { date: key, minutes: 0, count: 0, categories: {} };
   }
 
   for (const event of monthEvents) {
@@ -119,6 +119,7 @@ export function buildMonthlyTrendData(monthEvents, viewDate) {
     if (!dailyData[key]) continue;
     const minutes = getDuration(event) || 30;
     dailyData[key].minutes += minutes;
+    dailyData[key].count += 1;
     const cat = event.category || "General";
     dailyData[key].categories[cat] = (dailyData[key].categories[cat] || 0) + minutes;
   }
