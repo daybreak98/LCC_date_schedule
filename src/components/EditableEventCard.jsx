@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import { Edit3, Trash2, MapPin, Check, X } from "lucide-react";
 import TimeSelect from "./TimeSelect.jsx";
+import CategoryPicker from "./CategoryPicker.jsx";
 
-export default function EditableEventCard({ event, onUpdate, onDelete, onConfirmDelete }) {
+export default function EditableEventCard({
+  event,
+  onUpdate,
+  onDelete,
+  onConfirmDelete,
+  categoryTree,
+  onCategoryTreeUpdate,
+}) {
   const [isEditing, setIsEditing] = useState(false);
 
   async function handleSubmit(submitEvent) {
@@ -29,10 +37,13 @@ export default function EditableEventCard({ event, onUpdate, onDelete, onConfirm
             <TimeSelect name="start_time" label="开始时间" value={event.start_time} />
             <TimeSelect name="end_time" label="结束时间" value={event.end_time} />
           </div>
-          <div className="two-col">
-            <input name="category" defaultValue={event.category} placeholder="分类" />
-            <input name="location" defaultValue={event.location} placeholder="地点" />
-          </div>
+          <CategoryPicker
+            categoryTree={categoryTree}
+            defaultCategory={event.category}
+            defaultSubcategory={event.subcategory}
+            onUpdate={onCategoryTreeUpdate}
+          />
+          <input name="location" defaultValue={event.location} placeholder="地点" />
           <textarea name="description" rows="3" defaultValue={event.description} placeholder="备注" />
           <div className="edit-actions">
             <button className="save-edit" type="submit"><Check size={16} /> 保存</button>
@@ -50,7 +61,7 @@ export default function EditableEventCard({ event, onUpdate, onDelete, onConfirm
         <div className="event-card-head">
           <div>
             <strong>{event.title}</strong>
-            <span>{event.category}</span>
+            <span>{event.category}{event.subcategory ? ` / ${event.subcategory}` : ""}</span>
           </div>
           <div className="event-actions">
             <button type="button" onClick={() => setIsEditing(true)} title="编辑"><Edit3 size={16} /></button>

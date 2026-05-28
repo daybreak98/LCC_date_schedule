@@ -44,6 +44,9 @@ def init_db() -> None:
             """
         )
         conn.execute("CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date)")
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(events)").fetchall()}
+        if "subcategory" not in columns:
+            conn.execute("ALTER TABLE events ADD COLUMN subcategory TEXT NOT NULL DEFAULT ''")
         conn.commit()
 
 
@@ -125,6 +128,7 @@ def clean_event(raw: dict[str, Any], source: str = "manual") -> dict[str, Any] |
         "start_time": start_time,
         "end_time": end_time,
         "category": str(raw.get("category") or raw.get("type") or "General").strip()[:80] or "General",
+        "subcategory": str(raw.get("subcategory") or raw.get("sub_category") or raw.get("activity") or "").strip()[:80],
         "location": str(raw.get("location") or raw.get("place") or "").strip()[:160],
         "description": str(raw.get("description") or raw.get("notes") or raw.get("detail") or "").strip()[:2000],
         "source": source,
@@ -135,8 +139,8 @@ def insert_event(event: dict[str, Any]) -> dict[str, Any]:
     event_id = db_execute(
         """
         INSERT INTO events
-            (title, event_date, start_time, end_time, category, location, description, source)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (title, event_date, start_time, end_time, category, subcategory, location, description, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             event["title"],
@@ -144,6 +148,7 @@ def insert_event(event: dict[str, Any]) -> dict[str, Any]:
             event["start_time"],
             event["end_time"],
             event["category"],
+            event["subcategory"],
             event["location"],
             event["description"],
             event["source"],
@@ -381,6 +386,7 @@ class ScheduleHandler(BaseHTTPRequestHandler):
                         start_time = ?,
                         end_time = ?,
                         category = ?,
+                        subcategory = ?,
                         location = ?,
                         description = ?
                     WHERE id = ?
@@ -391,6 +397,7 @@ class ScheduleHandler(BaseHTTPRequestHandler):
                         event["start_time"],
                         event["end_time"],
                         event["category"],
+                        event["subcategory"],
                         event["location"],
                         event["description"],
                         event_id,

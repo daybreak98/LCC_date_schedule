@@ -35,6 +35,14 @@ export const CATEGORY_PRESETS = [
   "工作", "学习", "健康", "社交", "娱乐", "休息", "家务", "通勤", "个人", "会议",
 ];
 
+export const DEFAULT_CATEGORY_TREE = {
+  "健身": ["羽毛球", "游泳", "跑步", "力量训练", "瑜伽"],
+  "工作": ["会议", "深度工作", "项目推进", "复盘"],
+  "学习": ["英语", "阅读", "课程", "练习"],
+  "生活": ["家务", "采购", "通勤", "整理"],
+  "休闲": ["朋友聚会", "电影", "旅行", "散步"],
+};
+
 export const IMPORT_FORMAT_SPEC = {
   title: { type: "string", required: true, maxLength: 160, description: "事件标题" },
   date: { type: "string", required: true, pattern: "YYYY-MM-DD", description: "日期" },

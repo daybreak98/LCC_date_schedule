@@ -1,84 +1,68 @@
 import React, { useState } from "react";
-import { Plus, Trash2, Palette } from "lucide-react";
-import { CATEGORY_COLORS } from "../utils/constants.js";
+import { Plus, Trash2 } from "lucide-react";
 
-export default function CategoryManager({ categories, onUpdate }) {
-  const [newCat, setNewCat] = useState("");
-  const [editing, setEditing] = useState(null);
-  const [editName, setEditName] = useState("");
-
-  const allCats = { ...categories };
-  const catNames = Object.keys(allCats);
-  if (catNames.length === 0) {
-    allCats["General"] = CATEGORY_COLORS[0];
-  }
+export default function CategoryManager({ categoryTree, onUpdate }) {
+  const [newCategory, setNewCategory] = useState("");
 
   function addCategory() {
-    const name = newCat.trim();
-    if (!name || allCats[name]) return;
-    const color = CATEGORY_COLORS[Object.keys(allCats).length % CATEGORY_COLORS.length];
-    onUpdate({ ...allCats, [name]: color });
-    setNewCat("");
+    const name = newCategory.trim();
+    if (!name || categoryTree[name]) return;
+    onUpdate({ ...categoryTree, [name]: [] });
+    setNewCategory("");
   }
 
   function removeCategory(name) {
-    const next = { ...allCats };
+    const next = { ...categoryTree };
     delete next[name];
-    if (Object.keys(next).length === 0) {
-      next["General"] = CATEGORY_COLORS[0];
-    }
-    onUpdate(next);
+    onUpdate(Object.keys(next).length ? next : { General: [] });
   }
 
-  function startEdit(name) {
-    setEditing(name);
-    setEditName(name);
-  }
-
-  function saveEdit(oldName) {
-    const newName = editName.trim();
-    if (!newName || newName === oldName) {
-      setEditing(null);
-      return;
-    }
-    const next = {};
-    for (const [k, v] of Object.entries(allCats)) {
-      next[k === oldName ? newName : k] = v;
-    }
-    onUpdate(next);
-    setEditing(null);
+  function removeSubcategory(category, subcategory) {
+    onUpdate({
+      ...categoryTree,
+      [category]: categoryTree[category].filter((item) => item !== subcategory),
+    });
   }
 
   return (
     <div className="category-manager">
-      <div className="cat-list">
-        {Object.entries(allCats).map(([name, color]) => (
-          <div className="cat-row" key={name}>
-            <i style={{ background: color }} />
-            {editing === name ? (
-              <input
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                onBlur={() => saveEdit(name)}
-                onKeyDown={(e) => e.key === "Enter" && saveEdit(name)}
-                autoFocus
-              />
-            ) : (
-              <span onDoubleClick={() => startEdit(name)}>{name}</span>
-            )}
-            <div className="cat-actions">
-              <button type="button" onClick={() => startEdit(name)} title="重命名"><Palette size={14} /></button>
-              <button type="button" onClick={() => removeCategory(name)} title="删除"><Trash2 size={14} /></button>
+      <div className="category-tree-list">
+        {Object.entries(categoryTree).map(([category, subcategories]) => (
+          <section className="category-tree-card" key={category}>
+            <div className="category-tree-head">
+              <strong>{category}</strong>
+              <button type="button" onClick={() => removeCategory(category)} title="删除大类">
+                <Trash2 size={14} />
+              </button>
             </div>
-          </div>
+            <div className="category-tree-tags">
+              {subcategories.length === 0 && <span className="muted-chip">暂无小类</span>}
+              {subcategories.map((subcategory) => (
+                <button
+                  className="small-tag"
+                  key={`${category}-${subcategory}`}
+                  type="button"
+                  onClick={() => removeSubcategory(category, subcategory)}
+                  title="点击删除小类"
+                >
+                  {subcategory} ×
+                </button>
+              ))}
+            </div>
+          </section>
         ))}
       </div>
       <div className="cat-add">
         <input
-          placeholder="新分类名称"
-          value={newCat}
-          onChange={(e) => setNewCat(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addCategory()}
+          placeholder="新增大类，例如：健身"
+          value={newCategory}
+          onChange={(event) => setNewCategory(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              addCategory();
+            }
+          }}
         />
         <button type="button" onClick={addCategory}><Plus size={16} /></button>
       </div>

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { Filter, Search, X } from "lucide-react";
-import { CATEGORY_PRESETS } from "../utils/constants.js";
 
 function buildMeta({ search, category, dateFrom, dateTo }) {
   return {
@@ -21,7 +20,7 @@ function describeFilter(meta) {
   return parts.join(" · ");
 }
 
-export default function SearchFilter({ events, onFiltered }) {
+export default function SearchFilter({ events, onFiltered, categoryTree = {} }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -43,6 +42,7 @@ export default function SearchFilter({ events, onFiltered }) {
         (event) =>
           event.title.toLowerCase().includes(keyword) ||
           (event.description || "").toLowerCase().includes(keyword) ||
+          (event.subcategory || "").toLowerCase().includes(keyword) ||
           (event.location || "").toLowerCase().includes(keyword)
       );
     }
@@ -110,7 +110,7 @@ export default function SearchFilter({ events, onFiltered }) {
           <div className="filter-row">
             <select aria-label="分类筛选" value={category} onChange={(event) => setCategory(event.target.value)}>
               <option value="">全部分类</option>
-              {CATEGORY_PRESETS.map((preset) => (
+              {Object.keys(categoryTree).map((preset) => (
                 <option key={preset} value={preset}>{preset}</option>
               ))}
             </select>

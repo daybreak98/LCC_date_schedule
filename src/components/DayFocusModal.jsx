@@ -39,7 +39,7 @@ export default function DayFocusModal({ dateKey, events, onClose, onCreateFromMo
             <div className="focus-event-card">
               <div className="focus-event-head">
                 <strong>{event.title}</strong>
-                <span>{event.category || "General"}</span>
+                <span>{event.category || "General"}{event.subcategory ? ` / ${event.subcategory}` : ""}</span>
               </div>
               {event.location && <p className="event-meta"><MapPin size={14} />{event.location}</p>}
               {event.description && <p className="event-desc">{event.description}</p>}

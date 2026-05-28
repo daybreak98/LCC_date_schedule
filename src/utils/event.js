@@ -25,6 +25,7 @@ export function formToPayload(formData, eventDate) {
     start_time: formData.get("start_time"),
     end_time: formData.get("end_time"),
     category: formData.get("category"),
+    subcategory: formData.get("subcategory"),
     location: formData.get("location"),
     description: formData.get("description"),
   };

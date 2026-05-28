@@ -4,6 +4,7 @@ import {
   Moon, Sun, Download, Settings2,
 } from "lucide-react";
 import { toDateKey, formatDateZh, formatMonth, monthKey, getMonthRange } from "./utils/date.js";
+import { DEFAULT_CATEGORY_TREE } from "./utils/constants.js";
 import { sortEvents } from "./utils/event.js";
 import {
   buildWeeklyCategoryStats,
@@ -43,10 +44,17 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(() => {
     try { return localStorage.getItem("schedule-dark") === "1"; } catch { return false; }
   });
-  const [showCategoryMgr, setShowCategoryMgr] = useState(false);
+  const [activePanel, setActivePanel] = useState(null);
+  const [showCategoryMgr, setShowCategoryMgr] = useState(true);
   const [filteredEvents, setFilteredEvents] = useState(null);
   const [filterMeta, setFilterMeta] = useState({});
-  const [catColors, setCatColors] = useState({});
+  const [categoryTree, setCategoryTree] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("schedule-category-tree")) || DEFAULT_CATEGORY_TREE;
+    } catch {
+      return DEFAULT_CATEGORY_TREE;
+    }
+  });
 
   const { events, isLoading, fetchEvents, createEvent, updateEvent, deleteEvent, importFile } = useEvents();
   const { stats, fetchStats } = useStats();
@@ -76,6 +84,10 @@ export default function App() {
     document.documentElement.classList.toggle("dark", darkMode);
     try { localStorage.setItem("schedule-dark", darkMode ? "1" : "0"); } catch {}
   }, [darkMode]);
+
+  useEffect(() => {
+    try { localStorage.setItem("schedule-category-tree", JSON.stringify(categoryTree)); } catch {}
+  }, [categoryTree]);
 
   async function refresh() {
     try {
@@ -157,6 +169,7 @@ export default function App() {
         start: e.start_time,
         end: e.end_time,
         category: e.category,
+        subcategory: e.subcategory,
         location: e.location,
         description: e.description,
       })), null, 2);
@@ -217,8 +230,22 @@ export default function App() {
   }
 
   return (
-    <div className={`app ${darkMode ? "dark" : ""} ${isDetailOpen ? "detail-open" : ""}`}>
-      <aside className="rail">
+    <div className={`app ${darkMode ? "dark" : ""} ${isDetailOpen ? "detail-open" : ""} ${activePanel ? "panel-open" : ""}`}>
+      <div className="panel-launcher" aria-label="功能面板">
+        <button type="button" onClick={() => setActivePanel(activePanel === "overview" ? null : "overview")}>
+          <CalendarDays size={18} /> 总览
+        </button>
+        <button type="button" onClick={() => setActivePanel(activePanel === "import" ? null : "import")}>
+          <Download size={18} /> 文件
+        </button>
+        <button type="button" onClick={() => setActivePanel(activePanel === "tools" ? null : "tools")}>
+          <Settings2 size={18} /> 工具
+        </button>
+      </div>
+
+      {activePanel && <button className="panel-scrim" type="button" onClick={() => setActivePanel(null)} aria-label="关闭功能面板" />}
+
+      <aside className={`rail ${activePanel ? "is-open" : ""}`}>
         <div className="brand-block">
           <div className="brand-icon"><CalendarDays size={25} /></div>
           <div>
@@ -227,7 +254,7 @@ export default function App() {
           </div>
         </div>
 
-        <section className="control-panel">
+        {(activePanel === "overview" || !activePanel) && <section className="control-panel">
           <div className="month-switcher">
             <button type="button" onClick={() => shiftMonth(-1)} title="上个月"><ChevronLeft size={20} /></button>
             <div>
@@ -256,17 +283,17 @@ export default function App() {
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
-        </section>
+        </section>}
 
-        <ImportPanel status={importStatus} onImport={handleImport} />
+        {(activePanel === "import" || !activePanel) && <ImportPanel status={importStatus} onImport={handleImport} />}
 
-        {isLoading && !events.length ? (
+        {(activePanel === "overview" || !activePanel) && (isLoading && !events.length ? (
           <Skeleton type="metric" count={4} />
         ) : (
           <MetricPanel stats={stats} />
-        )}
+        ))}
 
-        <section className="control-panel">
+        {(activePanel === "tools" || !activePanel) && <section className="control-panel">
           <div className="panel-title">
             <span><Settings2 size={17} /> 快捷操作</span>
           </div>
@@ -297,11 +324,11 @@ export default function App() {
           </div>
           {showCategoryMgr && (
             <CategoryManager
-              categories={catColors}
-              onUpdate={setCatColors}
+              categoryTree={categoryTree}
+              onUpdate={setCategoryTree}
             />
           )}
-        </section>
+        </section>}
       </aside>
 
       <main className="calendar-stage">
@@ -323,7 +350,7 @@ export default function App() {
           </div>
         </header>
 
-        <SearchFilter events={events} onFiltered={handleFiltered} />
+        <SearchFilter events={events} onFiltered={handleFiltered} categoryTree={categoryTree} />
 
         {isLoading && !events.length ? (
           <Skeleton type="calendar" />
@@ -368,6 +395,8 @@ export default function App() {
         onUpdate={handleUpdate}
         onDelete={handleDelete}
         onConfirmDelete={handleConfirmDelete}
+        categoryTree={categoryTree}
+        onCategoryTreeUpdate={setCategoryTree}
       />
 
       {focusedDate && (

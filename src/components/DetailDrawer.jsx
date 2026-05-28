@@ -4,10 +4,12 @@ import { formatDateZh } from "../utils/date.js";
 import { getDuration } from "../utils/event.js";
 import EditableEventCard from "./EditableEventCard.jsx";
 import TimeSelect from "./TimeSelect.jsx";
+import CategoryPicker from "./CategoryPicker.jsx";
 
 export default function DetailDrawer({
   open, focusNonce, selectedDate, events, onClose,
   onCreate, onUpdate, onDelete, onConfirmDelete,
+  categoryTree, onCategoryTreeUpdate,
 }) {
   const formRef = useRef(null);
   const titleInputRef = useRef(null);
@@ -60,6 +62,8 @@ export default function DetailDrawer({
             onUpdate={onUpdate}
             onDelete={onDelete}
             onConfirmDelete={onConfirmDelete}
+            categoryTree={categoryTree}
+            onCategoryTreeUpdate={onCategoryTreeUpdate}
           />
         ))}
       </div>
@@ -74,10 +78,8 @@ export default function DetailDrawer({
           <TimeSelect name="start_time" label="开始时间" />
           <TimeSelect name="end_time" label="结束时间" />
         </div>
-        <div className="two-col">
-          <input name="category" placeholder="分类" list="cat-suggestions" />
-          <input name="location" placeholder="地点" />
-        </div>
+        <CategoryPicker categoryTree={categoryTree} onUpdate={onCategoryTreeUpdate} />
+        <input name="location" placeholder="地点" />
         <textarea name="description" rows="3" placeholder="备注" />
         <button className="primary-action" type="submit">保存日程</button>
       </form>
