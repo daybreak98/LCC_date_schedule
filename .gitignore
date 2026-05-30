@@ -4,6 +4,8 @@ data/*.db
 __pycache__/
 *.pyc
 .DS_Store
+.env
+.env.local
 .env.ios.local
 test-results/
 playwright-report/
