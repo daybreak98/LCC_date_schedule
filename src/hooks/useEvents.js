@@ -33,7 +33,8 @@ export function useEvents() {
   }, []);
 
   const createEvent = useCallback(async (formData, eventDate) => {
-    const payload = formToPayload(formData, eventDate);
+    const { data: { user } } = await supabase.auth.getUser();
+    const payload = { ...formToPayload(formData, eventDate), user_id: user?.id };
     const { data, error: insertError } = await supabase
       .from("events")
       .insert(payload)
@@ -73,9 +74,12 @@ export function useEvents() {
       throw new Error("文件中未找到可导入的日程数据");
     }
 
+    const { data: { user } } = await supabase.auth.getUser();
+    const payload = parsed.map((e) => ({ ...e, user_id: user?.id }));
+
     const { data, error: importError } = await supabase
       .from("events")
-      .insert(parsed)
+      .insert(payload)
       .select();
 
     if (importError) throw new Error(importError.message);
