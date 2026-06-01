@@ -2379,3 +2379,173 @@ button:focus-visible {
 datalist {
   display: none;
 }
+
+/* ========== 登录页 ========== */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), transparent 34%),
+    linear-gradient(315deg, rgba(180, 83, 9, 0.12), transparent 38%),
+    var(--paper);
+}
+
+.login-card {
+  width: min(420px, 92vw);
+  padding: 32px;
+  border: 1px solid rgba(23, 33, 29, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 253, 250, 0.95);
+  box-shadow: var(--shadow);
+}
+
+.dark .login-card {
+  background: rgba(26, 34, 29, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.login-brand h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.login-brand p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.login-field {
+  margin-bottom: 14px;
+}
+
+.login-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.login-field input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  outline-color: var(--teal);
+}
+
+.dark .login-field input {
+  background: #111a14;
+}
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.dark .login-error {
+  background: #7f1d1d;
+  color: #fecaca;
+}
+
+.login-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.login-switch {
+  margin: 16px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.login-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--teal);
+  font-weight: 800;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.login-hint {
+  margin: 20px 0 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--panel-strong);
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ========== 退出登录按钮 ========== */
+.logout-button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.logout-button:hover {
+  color: var(--rose);
+  border-color: var(--rose);
+}
+
+/* ========== 认证加载 ========== */
+.auth-loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  gap: 12px;
+  background: var(--paper);
+  color: var(--muted);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

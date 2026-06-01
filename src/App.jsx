@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus,
-  Moon, Sun, Download, Settings2,
+  Moon, Sun, Download, Settings2, LogOut, Loader2,
 } from "lucide-react";
 import { toDateKey, formatDateZh, formatMonth, monthKey, getMonthRange } from "./utils/date.js";
 import { DEFAULT_CATEGORY_TREE } from "./utils/constants.js";
@@ -16,6 +16,8 @@ import { useStats } from "./hooks/useStats.js";
 import { useKeyboardNav } from "./hooks/useKeyboardNav.js";
 import { useToast } from "./hooks/useToast.js";
 import { useConfirm } from "./hooks/useConfirm.js";
+import { useAuth } from "./hooks/useAuth.js";
+import LoginPage from "./components/LoginPage.jsx";
 import ImportPanel from "./components/ImportPanel.jsx";
 import MetricPanel from "./components/MetricPanel.jsx";
 import CalendarGrid from "./components/CalendarGrid.jsx";
@@ -60,6 +62,7 @@ export default function App() {
   const { stats, fetchStats } = useStats();
   const { toasts, addToast, removeToast } = useToast();
   const { confirmData, handleConfirm, cancelConfirm, confirm } = useConfirm();
+  const { user, loading: authLoading, signIn, signUp, signOut } = useAuth();
 
   useKeyboardNav({ viewDate, setViewDate, selectedDate, setSelectedDate, setIsDetailOpen });
 
@@ -229,6 +232,24 @@ export default function App() {
     setSelectedDate(key);
   }
 
+  if (authLoading) {
+    return (
+      <div className="auth-loading">
+        <Loader2 size={40} className="spin" />
+        <p>加载中...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <LoginPage
+        onSignIn={signIn}
+        onSignUp={signUp}
+      />
+    );
+  }
+
   return (
     <div className={`app ${darkMode ? "dark" : ""} ${isDetailOpen ? "detail-open" : ""} ${activePanel ? "panel-open" : ""}`}>
       <div className="panel-launcher" aria-label="功能面板">
@@ -252,6 +273,14 @@ export default function App() {
             <h1>日程管理</h1>
             <p>{formatDateZh(toDateKey(today))}</p>
           </div>
+          <button
+            className="logout-button"
+            type="button"
+            onClick={() => { signOut(); addToast("已退出登录", "info"); }}
+            title="退出登录"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
 
         {(activePanel === "overview" || !activePanel) && <section className="control-panel">
